@@ -1370,7 +1370,7 @@ void MeshSaliency::ComputeSaliency_OneLevel()
 	LevelSaliency(1, Epsilon, vertexCnt, LocalMax[0], Points, meanCurvature, Saliency[2], &SmoothFactor[2]);
 }
 
-void MeshSaliency::WriteOneLevel(const char* SaliencyPath, const char* LocalMaxPath)
+void MeshSaliency::WriteOneLevelAndLocalMax(const char* SaliencyPath, const char* LocalMaxPath)
 {
 	/*水平度为1的前30%的显著性点的输出*/
 	FILE* fp = NULL;//需要注意
@@ -1409,7 +1409,34 @@ void MeshSaliency::WriteOneLevel(const char* SaliencyPath, const char* LocalMaxP
 	fp = NULL;//需要指向空，否则会指向原打开文件地址
 }
 
-void MeshSaliency::WriteOneLevel(const char* SaliencyAndLocalMaxPath)
+//仅输出一个水平度
+void MeshSaliency::WriteOneLevel(const char* OneSaliencyPath)
+{
+	/*水平度为1的前20%的显著性点和局部最大值点的输出*/
+	FILE* fp = NULL;//需要注意
+	fp = fopen(OneSaliencyPath, "w");  //创建文件
+	if (NULL == fp)
+		return;//要返回错误代码
+	float *SortSaliency = new float[vertexCnt];
+	memcpy(SortSaliency, Saliency[2], vertexCnt * sizeof(float));
+	std::sort(SortSaliency, SortSaliency + vertexCnt, std::greater<float>());
+	int GreateIndex = ceil(vertexCnt * 0.2);
+	float Threshold = SortSaliency[GreateIndex];
+
+	for (int i = 0; i < vertexCnt; i++)
+	{
+		if (Saliency[2][i] > Threshold)
+		{
+			fprintf(fp, "%.6f %.6f %.6f\n", Points[i * 3], Points[i * 3 + 1], Points[i * 3 + 2]);
+		}
+	}
+	delete[] SortSaliency;
+
+	fclose(fp);
+	fp = NULL;//需要指向空，否则会指向原打开文件地址
+}
+
+void MeshSaliency::WriteOneLevelAndLocalMax(const char* SaliencyAndLocalMaxPath)
 {
 	/*水平度为1的前10%的显著性点和局部最大值点的输出*/
 	FILE* fp = NULL;//需要注意
@@ -1931,3 +1958,4 @@ void MeshSaliency::WriteLocalMaxPoints(std::string filePath[])
 	}
 }
 
+ 

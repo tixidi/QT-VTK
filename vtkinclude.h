@@ -47,4 +47,6 @@
 #include <vtkStringArray.h>
 #include <vtkGeometryFilter.h>
 #include <vtkAreaPicker.h>
+#include <vtkImageShiftScale.h>
+#include <vtksys/SystemTools.hxx>
 

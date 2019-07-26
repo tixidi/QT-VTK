@@ -24,7 +24,7 @@
 class VTK3D {
 public:
 	VTK3D(QVTKWidget *widget);
-	void ShowVTK3D(const char* filepath, const char* fileExten);
+	void ShowVTK3D(const char* filepath);
 	void ShowMulti(QList <QString> &filepaths);
 private:
 	QVTKWidget * qvtkwidget;
@@ -32,9 +32,6 @@ private:
 	bool bpFlag;    //背景顶点特有的暗灰色
 	vtkSmartPointer<vtkPoints> ReadPoints(const char *filepath);
 	vtkSmartPointer<vtkPolyData> VTK3D::ReadPolyData(const char *filepath);
-	void displaySTL(const char *filepath);
-	void displayOBJ(const char *filepath);
-	void displayPLY(const char *filepath);
-	void displayFP(const char *filepath);
-	void displayBP(const char* filePath);
+	void display3D(const char* filepath);  //显示单个3D格式的文件
+	void displayPoint(const char* filepath);  //显示3D特征点,点的三维坐标
 };

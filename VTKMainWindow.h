@@ -92,6 +92,7 @@ private:
 	//vtk的功能函数
 	QAction *CPUVolumeAction;                 //CPU体绘
 	QAction *GPUVolumeAction;                 //GPU体绘
+	QAction *ctkVTKGPUVolumeAction;           //使用控制体绘制的参数
 	QAction *MarchingCubesAction;             //按图片序列面绘
 	QAction *MarchingDirCTAction;             //整个目录的面绘
 	QAction *OBJOutputAction;                 //OBJ模型输出
@@ -130,6 +131,7 @@ public slots:
 	void slotDirCTCubes();
 	void slotGPUVolumeRender();
 	void slotCPUVolumeRender();
+	void slotctkVTKGPUVolumeRender();
 	void slotSinglePointPick();            //拾取功能
 	void slotAreaPick();
 	void slotActorPick();

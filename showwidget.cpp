@@ -9,12 +9,14 @@ ShowWidget::ShowWidget(QWidget *parent) : QWidget(parent)
 	list->insertItem(0, QString::fromLocal8Bit("单个面板"));
 	list->insertItem(1, QString::fromLocal8Bit("两个面板"));
 	list->insertItem(2, QString::fromLocal8Bit("四个面板"));
-	list->setMaximumSize(QSize(150, 600));
+	//list->setMaximumSize(QSize(150, 600));
+	fileview = new FileWidget(splitterLeft);
 	hitLabel = new QLabel(QString::fromLocal8Bit("提示信息"), splitterLeft);
 	textEdit = new QTextEdit(QString::fromLocal8Bit("相关操作提示"), splitterLeft);
 	practice = new CenterWidget(splitterMain);
 	QObject::connect(list, SIGNAL(currentRowChanged(int)), practice->stack, SLOT(setCurrentIndex(int)));
-	fileview = new FileWidget(splitterMain);
+	//fileview = new FileWidget(splitterMain);
+	volumePropertywidget = new ctkVTKVolumePropertyWidget(splitterMain);
 	//设置主布局框即水平分割窗口的标题
 	//splitterMain->setWindowTitle(QString::fromLocal8Bit("3D图形软件"));
 	//设置主布局框即水平分割窗口的最小尺寸

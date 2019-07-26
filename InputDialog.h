@@ -10,6 +10,7 @@
 #include <Data.h>
 #include <qcolor.h>
 #include <qcolordialog.h>
+#include <qcombobox.h>
 #include <qstringlist.h>
 class MarchingDialogSingle : public QDialog
 {
@@ -56,14 +57,16 @@ public:
 	void createGradientOpacityModel();
 	void createColorModel();
 	void createHBoxLayout();
+	void createVolumeTextCombox();
 	void setupView();
 	void openFile(QString path);
 	VolumeData *getdata();
 	
 
-	public slots:
+public slots:
 	void slotOpen();
 	void setVolumevalue();
+	void slotComboBoxChanged(const QString &text);
 
 private:
 	int value;
@@ -83,6 +86,8 @@ private:
 	QTableView *GradientOpacityTable;
 	QStandardItemModel *ColorModel;
 	QTableView *ColorTable;
+	QLabel *volumeTextLabel;
+	QComboBox *volumeTextComboBox;
 	QGridLayout *baseLayout;
 	QHBoxLayout *hLayout;
 	QVBoxLayout *modelLayout;

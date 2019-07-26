@@ -4,6 +4,12 @@
 #include <showwidget.h>
 #include <VTKMainWindow.h>
 #include <Windows.h>
+#include "ctkTransferFunction.h"
+#include "ctkTransferFunctionControlPointsItem.h"
+#include "ctkTransferFunctionGradientItem.h"
+#include "ctkTransferFunctionView.h"
+#include "ctkVTKCompositeFunction.h"
+#include <vtkTextProperty.h>
 VTK_MODULE_INIT(vtkRenderingOpenGL)
 VTK_MODULE_INIT(vtkInteractionStyle);
 VTK_MODULE_INIT(vtkRenderingFreeType);
@@ -18,5 +24,7 @@ int main(int argc, char *argv[])
 	//widget->show();
 	VTKMainWindow w;
 	w.show();
+	
+
 	return a.exec();
 }

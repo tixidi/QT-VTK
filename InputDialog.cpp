@@ -178,14 +178,51 @@ void VolumeInputDialog::createGridLayout()
 	endInput->setText(QString::number(value));
 	endInput->setValidator(validator);
 	endInput->setToolTip(QString::fromLocal8Bit("超出范围的数据无法输入和显示"));
-	OpenFileButton = new QPushButton(QString::fromLocal8Bit("打开体绘的数据文件/TXT"));
+	volumeTextLabel = new QLabel(QString::fromLocal8Bit("选择默认的体绘数据"));
+	volumeTextComboBox = new QComboBox;
+	createVolumeTextCombox();
+	connect(volumeTextComboBox, SIGNAL(currentIndexChanged(const QString &)), 
+		this, SLOT(slotComboBoxChanged(const QString &)));
+	OpenFileButton = new QPushButton(QString::fromLocal8Bit("从TXT文件中输入体绘数据"));
 	connect(OpenFileButton, SIGNAL(clicked()), this, SLOT(slotOpen()));
 	baseLayout = new QGridLayout();
 	baseLayout->addWidget(startLabel, 0, 0);
 	baseLayout->addWidget(startInput, 0, 1);
 	baseLayout->addWidget(endLabel, 1, 0);
 	baseLayout->addWidget(endInput, 1, 1);
-	baseLayout->addWidget(OpenFileButton, 2, 0, 1, 2);
+	baseLayout->addWidget(volumeTextLabel, 2, 0);
+	baseLayout->addWidget(volumeTextComboBox, 2, 1);
+	baseLayout->addWidget(OpenFileButton, 3, 0, 1, 2);
+}
+
+void VolumeInputDialog::createVolumeTextCombox()
+{
+	QString volumeTextPath = "Data/VolumeText";
+	QDir dir(volumeTextPath);
+	QFileInfoList file_list = dir.entryInfoList(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
+
+	QString ext; //获取文件名的拓展
+	volumeTextComboBox->addItem("None");
+
+	for (auto & fileinfo : file_list)
+	{
+		ext = fileinfo.suffix();    //后缀名
+		if (ext == "txt")
+		{
+			volumeTextComboBox->addItem(fileinfo.baseName());
+		}
+	}
+}
+
+
+void VolumeInputDialog::slotComboBoxChanged(const QString &text)
+{
+	if (text != "None")
+	{
+		QString filePath = "Data/VolumeText/" + text + ".txt";
+		openFile(filePath);
+		qDebug("Hello");
+	}
 }
 
 void VolumeInputDialog::slotOpen()

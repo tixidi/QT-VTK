@@ -137,6 +137,8 @@ void VTKMainWindow::createActions()
 	GPUVolumeAction = new QAction(QString::fromLocal8Bit("GPU体绘"));
 	connect(GPUVolumeAction, SIGNAL(triggered()), this, SLOT(slotGPUVolumeRender()));
 	GPUVolumeAction->setStatusTip(QString::fromLocal8Bit("使用独立显卡绘制"));
+	ctkVTKGPUVolumeAction = new QAction(QString::fromLocal8Bit("使用ctk控制体绘制参数"));
+	connect(ctkVTKGPUVolumeAction, SIGNAL(triggered()), this, SLOT(slotctkVTKGPUVolumeRender()));
 	MarchingCubesAction = new QAction(QString::fromLocal8Bit("面绘"));
 	connect(MarchingCubesAction, SIGNAL(triggered()), this, SLOT(slotShowCubes()));
 	MarchingDirCTAction = new QAction(QString::fromLocal8Bit("按目录面绘（DICOM图像）"));
@@ -233,6 +235,7 @@ void VTKMainWindow::createMenus()
 	vtkMenu->addAction(MarchingCubesAction);
 	vtkMenu->addAction(MarchingDirCTAction);
 	vtkMenu->addAction(OBJOutputAction);
+	vtkMenu->addAction(ctkVTKGPUVolumeAction);
 	PickMenu = vtkMenu->addMenu(QString::fromLocal8Bit("拾取操作"));
 	PickMenu->addAction(SinglePointPickAction);
 	//PickMenu->addAction(MutiplePointPickAction);
@@ -341,15 +344,17 @@ void VTKMainWindow::Show(QString &QSfilePath)
 	QByteArray QBfilePath = QSfilePath.toLocal8Bit();
 	const char* filepath = QBfilePath.data();
 	//获取扩展名
-	int exetension = QSfilePath.lastIndexOf(".");
+	/*int exetension = QSfilePath.lastIndexOf(".");
 	QString fileExt = QSfilePath.right(QSfilePath.length() - exetension - 1);
 	QByteArray Extba = fileExt.toLocal8Bit();
-	const char* fileExten = Extba.data();
+	const char* fileExten = Extba.data();*/
+	std::string extension = vtksys::SystemTools::GetFilenameLastExtension(std::string(filepath));
 	
 	int currentrow = showwidget->list->currentRow();
 	if (currentrow == 0)      //单个面板
 	{
-		if (!_stricmp(fileExten, "jpg") || !_stricmp(fileExten, "bmp") || !_stricmp(fileExten, "png"))
+		//if (!_stricmp(fileExten, "jpg") || !_stricmp(fileExten, "bmp") || !_stricmp(fileExten, "png"))
+		if (extension == ".jpg" || extension == ".bmp" || extension == ".png")
 		{
 			if (showwidget->practice->onewidget->initialCount == 0)
 			{
@@ -357,7 +362,7 @@ void VTKMainWindow::Show(QString &QSfilePath)
 			}
 			showwidget->practice->onewidget->ShowImage(filepath);
 		}
-		else if (!_stricmp(fileExten, "dcm"))
+		else if (extension == ".dcm")
 		{
 			if (showwidget->practice->onewidget->initialCount == 0)
 			{
@@ -365,18 +370,19 @@ void VTKMainWindow::Show(QString &QSfilePath)
 			}
 			showwidget->practice->onewidget->ShowDICOM(filepath);
 		}
-		else if (!_stricmp(fileExten, "stl") || !_stricmp(fileExten, "obj") 
-			|| !_stricmp(fileExten, "ply") || !_stricmp(fileExten, "fp") || !_stricmp(fileExten, "bp") )
+		else if (extension == ".stl" || extension == ".obj" || extension == ".ply" ||
+			     extension == ".vtp" || extension == ".g" || extension == ".vtk" ||
+			     extension == ".fp"  || extension == ".bp")
 		{
 			VTK3D *vtk3d = new VTK3D(showwidget->practice->onewidget->qvtkwidget1);
-			vtk3d->ShowVTK3D(filepath, fileExten);
+			vtk3d->ShowVTK3D(filepath);
 		}
-		else if (!_stricmp(fileExten, "pcd"))
+		else if (extension == ".pcd")
 		{
 			PCLPoint *pcl = new PCLPoint(showwidget->practice->onewidget->qvtkwidget1);
 			pcl->ShowPointCloud(filepath);
 		}
-		else if(exetension == -1)
+		else if(extension.empty())
 		{
 			QMessageBox::information(this, QString::fromLocal8Bit("提醒信息"),
 				QString::fromLocal8Bit("请输入带有后缀名的文件"));
@@ -405,7 +411,7 @@ void VTKMainWindow::Show(QString &QSfilePath)
 			usedwidget = showwidget->practice->twowidget->qvtkwidge2;
 			break;
 		}
-		if (!_stricmp(fileExten, "jpg") || !_stricmp(fileExten, "bmp") || !_stricmp(fileExten, "png"))
+		if (extension == ".jpg" || extension == ".bmp" || extension == ".png")
 		{
 			if (showwidget->practice->twowidget->initialCount[i - 1] == 0)
 			{
@@ -413,7 +419,7 @@ void VTKMainWindow::Show(QString &QSfilePath)
 			}
 			showwidget->practice->twowidget->ShowImage(filepath, i);
 		}
-		else if (!_stricmp(fileExten, "dcm"))
+		else if (extension == ".dcm")
 		{
 			if (showwidget->practice->twowidget->initialCount[i - 1] == 0)
 			{
@@ -421,18 +427,19 @@ void VTKMainWindow::Show(QString &QSfilePath)
 			}
 			showwidget->practice->twowidget->ShowDICOM(filepath, i);
 		}
-		else if (!_stricmp(fileExten, "stl") || !_stricmp(fileExten, "obj") || 
-			!_stricmp(fileExten, "ply") || !_stricmp(fileExten, "fp") || !_stricmp(fileExten, "bp") )
+		else if (extension == ".stl" || extension == ".obj" || extension == ".ply" ||
+			     extension == ".vtp" || extension == ".g" || extension == ".vtk" ||
+			     extension == ".fp" || extension == ".bp")
 		{
 			VTK3D *vtk3d = new VTK3D(usedwidget);
-			vtk3d->ShowVTK3D(filepath, fileExten);
+			vtk3d->ShowVTK3D(filepath);
 		}
-		else if (!_stricmp(fileExten, "pcd"))
+		else if (extension == ".pcd")
 		{
 			PCLPoint *pcl = new PCLPoint(usedwidget);
 			pcl->ShowPointCloud(filepath);
 		}
-		else if (exetension == -1)
+		else if (extension.empty())
 		{
 			QMessageBox::information(this, QString::fromLocal8Bit("提醒信息"),
 				QString::fromLocal8Bit("请输入带有后缀名的文件"));
@@ -468,7 +475,7 @@ void VTKMainWindow::Show(QString &QSfilePath)
 			usedwidget = showwidget->practice->fourwidget->qvtkwidge4;
 			break;
 		}
-		if (!_stricmp(fileExten, "jpg") || !_stricmp(fileExten, "bmp") || !_stricmp(fileExten, "png"))
+		if (extension == ".jpg" || extension == ".bmp" || extension == ".png")
 		{
 			if (showwidget->practice->fourwidget->initialCount[i-1] == 0)
 			{
@@ -476,7 +483,7 @@ void VTKMainWindow::Show(QString &QSfilePath)
 			}
 			showwidget->practice->fourwidget->ShowImage(filepath, i);
 		}
-		else if (!_stricmp(fileExten, "dcm"))
+		else if (extension == ".dcm")
 		{
 			if (showwidget->practice->fourwidget->initialCount[i - 1] == 0)
 			{
@@ -484,18 +491,19 @@ void VTKMainWindow::Show(QString &QSfilePath)
 			}
 			showwidget->practice->fourwidget->ShowDICOM(filepath, i);
 		}
-		else if (!_stricmp(fileExten, "stl") || !_stricmp(fileExten, "obj") 
-			|| !_stricmp(fileExten, "ply") || !_stricmp(fileExten, "fp") || !_stricmp(fileExten, "bp"))
+		else if (extension == ".stl" || extension == ".obj" || extension == ".ply" ||
+			     extension == ".vtp" || extension == ".g" || extension == ".vtk" ||
+			     extension == ".fp" || extension == ".bp")
 		{
 			VTK3D *vtk3d = new VTK3D(usedwidget);
-			vtk3d->ShowVTK3D(filepath, fileExten);
+			vtk3d->ShowVTK3D(filepath);
 		}
-		else if (!_stricmp(fileExten, "pcd"))
+		else if (extension == ".pcd")
 		{
 			PCLPoint *pcl = new PCLPoint(usedwidget);
 			pcl->ShowPointCloud(filepath);
 		}
-		else if (exetension == -1)
+		else if (extension.empty())
 		{
 			QMessageBox::information(this, QString::fromLocal8Bit("提醒信息"),
 				QString::fromLocal8Bit("请输入带有后缀名的文件"));
@@ -811,7 +819,9 @@ void VTKMainWindow::slotGPUVolumeRender()
 				return;
 			}
 			VolumeData *volumedata = inputvolume->getdata();
-			VolumeRender *volume = new VolumeRender(showwidget->practice->onewidget->qvtkwidget1, volumedata);
+			//VolumeRender *volume = new VolumeRender(showwidget->practice->onewidget->qvtkwidget1, volumedata);
+			VolumeRender *volume = new VolumeRender(showwidget->practice->onewidget->qvtkwidget1, 
+				volumedata, showwidget->volumePropertywidget);
 			volume->GPU(dirpath2, fileExten);
 		}
 		else if (!_stricmp(fileExten, "dcm"))
@@ -826,7 +836,9 @@ void VTKMainWindow::slotGPUVolumeRender()
 				return;
 			}
 			VolumeData *volumedata = inputvolume->getdata();
-			VolumeRender *volume = new VolumeRender(showwidget->practice->onewidget->qvtkwidget1, volumedata);
+			//VolumeRender *volume = new VolumeRender(showwidget->practice->onewidget->qvtkwidget1, volumedata);
+			VolumeRender *volume = new VolumeRender(showwidget->practice->onewidget->qvtkwidget1, volumedata
+				,showwidget->volumePropertywidget);
 			volume->GPU(dirpath2, fileExten);
 		}
 		else if (exetension == -1)
@@ -870,7 +882,7 @@ void VTKMainWindow::slotGPUVolumeRender()
 				return;
 			}
 			VolumeData *volumedata = inputvolume->getdata();
-			VolumeRender *volume = new VolumeRender(usedwidget, volumedata);
+			VolumeRender *volume = new VolumeRender(usedwidget, volumedata, showwidget->volumePropertywidget);
 			volume->GPU(dirpath2, fileExten);
 		}
 		else if (!_stricmp(fileExten, "dcm"))
@@ -885,7 +897,7 @@ void VTKMainWindow::slotGPUVolumeRender()
 				return;
 			}
 			VolumeData *volumedata = inputvolume->getdata();
-			VolumeRender *volume = new VolumeRender(usedwidget, volumedata);
+			VolumeRender *volume = new VolumeRender(usedwidget, volumedata, showwidget->volumePropertywidget);
 			volume->GPU(dirpath2, fileExten);
 		}
 		else if (exetension == -1)
@@ -935,7 +947,7 @@ void VTKMainWindow::slotGPUVolumeRender()
 				return;
 			}
 			VolumeData *volumedata = inputvolume->getdata();
-			VolumeRender *volume = new VolumeRender(usedwidget, volumedata);
+			VolumeRender *volume = new VolumeRender(usedwidget, volumedata, showwidget->volumePropertywidget);
 			volume->GPU(dirpath2, fileExten);
 		}
 		else if (!_stricmp(fileExten, "dcm"))
@@ -950,7 +962,7 @@ void VTKMainWindow::slotGPUVolumeRender()
 				return;
 			}
 			VolumeData *volumedata = inputvolume->getdata();
-			VolumeRender *volume = new VolumeRender(usedwidget, volumedata);
+			VolumeRender *volume = new VolumeRender(usedwidget, volumedata, showwidget->volumePropertywidget);
 			volume->GPU(dirpath2, fileExten);
 		}
 		else if (exetension == -1)
@@ -1615,9 +1627,9 @@ void VTKMainWindow::slotSTL2PLY()
 
 void VTKMainWindow::slotOBJ2PLY()
 {
-	const char* stlName = "obj";
+	const char* objName = "obj";
 	const char* plyName = "ply";
-	AToBDialog *test = new AToBDialog(0, stlName, plyName);
+	AToBDialog *test = new AToBDialog(0, objName, plyName);
 	if (!test->exec())
 	{
 		return;
@@ -1702,6 +1714,7 @@ void VTKMainWindow::slotPLYFeature()
 	//mesh.setFaceReduceOne();  //Armadilo
 	mesh.ComputeSaliency_OneLevel();
 	mesh.WriteOneLevel(fppath);
+	//mesh.WriteOneLevelAndLocalMax(fppath);
 
 	QMessageBox::information(this, QString::fromLocal8Bit("提醒信息"),
 		QString::fromLocal8Bit("特征点检测完成"));
@@ -1709,9 +1722,9 @@ void VTKMainWindow::slotPLYFeature()
 
 void VTKMainWindow::slotPLY2BP()
 {
-	const char* stlName = "ply";
-	const char* plyName = "bp";
-	AToBDialog *test = new AToBDialog(0, stlName, plyName);
+	const char* plyName = "ply";
+	const char* bpName = "bp";
+	AToBDialog *test = new AToBDialog(0, plyName, bpName);
 	if (!test->exec())
 	{
 		return;
@@ -1727,4 +1740,115 @@ void VTKMainWindow::slotPLY2BP()
 	bp.Write();
 	QMessageBox::information(this, QString::fromLocal8Bit("提醒信息"),
 		QString::fromLocal8Bit("转换完成"));
+}
+
+//使用ctk框架控制体绘制参数
+void VTKMainWindow::slotctkVTKGPUVolumeRender()
+{
+	// show file dialog. change filename only when the new filename is not empty.
+	QString filter("Meta image file (*.mhd *.mha)");
+	QString filename = "";
+	filename = QFileDialog::getOpenFileName(this, QString(tr("Open a volume data set")), filename, filter);
+	if (filename.trimmed().isEmpty())
+	{
+		qDebug("文件名为空!");
+		return;
+	}
+	
+
+	// show filename on window title
+	this->setWindowTitle(QString::fromUtf8("Volume Renderer - ") + filename);
+
+	// get local 8-bit representation of the string in locale encoding (in case the filename contains non-ASCII characters) 
+	QByteArray ba = filename.toLocal8Bit();
+	const char *filename_str = ba.data();
+
+
+	// read Meta Image (.mhd or .mha) files
+	auto reader = vtkSmartPointer<vtkMetaImageReader>::New();
+	reader->SetFileName(filename_str);
+
+	//// read a series of raw files in the specified folder
+	//auto reader = vtkSmartPointer<vtkVolume16Reader>::New();
+	//reader->SetDataDimensions(512, 512);
+	//reader->SetImageRange(1, 361);
+	//reader->SetDataByteOrderToBigEndian();
+	//reader->SetFilePrefix(filename_str);
+	//reader->SetFilePattern("%s%d");
+	//reader->SetDataSpacing(1, 1, 1);
+
+	//// read NRRD files
+	//vtkNew<vtkNrrdReader> reader;
+	//if (!reader->CanReadFile(filename_str))
+	//{
+	//	std::cerr << "Reader reports " << filename_str << " cannot be read.";
+	//	exit(EXIT_FAILURE);
+	//}
+	//reader->SetFileName(filename_str);
+	//reader->Update();
+
+
+	// scale the volume data to unsigned char (0-255) before passing it to volume mapper
+	auto shiftScale = vtkSmartPointer<vtkImageShiftScale>::New();
+	shiftScale->SetInputConnection(reader->GetOutputPort());
+	shiftScale->SetOutputScalarTypeToUnsignedChar();
+
+	// Create transfer mapping scalar value to opacity.
+	auto opacityTransferFunction = vtkSmartPointer<vtkPiecewiseFunction>::New();
+	opacityTransferFunction->AddPoint(0.0, 0.0);
+	opacityTransferFunction->AddPoint(36.0, 0.125);
+	opacityTransferFunction->AddPoint(72.0, 0.25);
+	opacityTransferFunction->AddPoint(108.0, 0.375);
+	opacityTransferFunction->AddPoint(144.0, 0.5);
+	opacityTransferFunction->AddPoint(180.0, 0.625);
+	opacityTransferFunction->AddPoint(216.0, 0.75);
+	opacityTransferFunction->AddPoint(255.0, 0.875);
+
+	// Create transfer mapping scalar value to color.
+	auto colorTransferFunction = vtkSmartPointer<vtkColorTransferFunction>::New();
+	colorTransferFunction->AddRGBPoint(0.0, 0.0, 0.0, 0.0);
+	colorTransferFunction->AddRGBPoint(36.0, 1.0, 0.0, 0.0);
+	colorTransferFunction->AddRGBPoint(72.0, 1.0, 1.0, 0.0);
+	colorTransferFunction->AddRGBPoint(108.0, 0.0, 1.0, 0.0);
+	colorTransferFunction->AddRGBPoint(144.0, 0.0, 1.0, 1.0);
+	colorTransferFunction->AddRGBPoint(180.0, 0.0, 0.0, 1.0);
+	colorTransferFunction->AddRGBPoint(216.0, 1.0, 0.0, 1.0);
+	colorTransferFunction->AddRGBPoint(255.0, 1.0, 1.0, 1.0);
+
+	// set up volume property
+	auto volumeProperty = vtkSmartPointer<vtkVolumeProperty>::New();
+	volumeProperty->SetColor(colorTransferFunction);
+	volumeProperty->SetScalarOpacity(opacityTransferFunction);
+	volumeProperty->ShadeOff();
+	volumeProperty->SetInterpolationTypeToLinear();
+
+	// assign volume property to the volume property widget
+	showwidget->volumePropertywidget->setVolumeProperty(volumeProperty);
+	if (showwidget->volumePropertywidget == NULL)
+	{
+		return;
+	}
+
+	auto volumeMapper = vtkSmartPointer<vtkGPUVolumeRayCastMapper>::New();
+	
+	volumeMapper->SetInputConnection(shiftScale->GetOutputPort());
+
+	// The volume holds the mapper and the property and can be used to position/orient the volume.
+	auto volume = vtkSmartPointer<vtkVolume>::New();
+	volume->SetMapper(volumeMapper);
+	volume->SetProperty(volumeProperty);
+
+	// add the volume into the renderer
+	auto renderer = vtkSmartPointer<vtkRenderer>::New();
+	renderer->AddVolume(volume);
+	renderer->SetBackground(1, 1, 1);
+
+	
+	usedwidget = showwidget->practice->onewidget->qvtkwidget1;
+	auto window = vtkSmartPointer<vtkRenderWindow>::New();
+	usedwidget->SetRenderWindow(window);
+	window->AddRenderer(renderer);
+	window->Render();
+	usedwidget->GetInteractor()->Initialize();
+	
 }

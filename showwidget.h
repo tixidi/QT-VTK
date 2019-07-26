@@ -6,6 +6,16 @@
 #include <qtextedit.h>
 #include <FileWidget.h>
 #include <CenterWidget.h>
+
+//CTK
+#include <ctkTransferFunction.h>
+#include <ctkVTKColorTransferFunction.h>
+#include <ctkTransferFunctionView.h>
+#include <ctkTransferFunctionGradientItem.h>
+#include <ctkTransferFunctionControlPointsItem.h>
+#include <ctkVTKVolumePropertyWidget.h>
+#include <ctkVTKTextPropertyWidget.h>
+
 class ShowWidget : public QWidget
 {
 	Q_OBJECT
@@ -19,4 +29,6 @@ public:
 	QLabel *hitLabel;
 	QTextEdit *textEdit;
 	FileWidget *fileview;
+	//体绘数据的控制模板
+	ctkVTKVolumePropertyWidget *volumePropertywidget;
 };

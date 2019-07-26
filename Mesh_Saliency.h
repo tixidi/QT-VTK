@@ -40,8 +40,9 @@ public:
 	void WriteSaliencyPoints(const char* filepath);
 	void WriteLevelPoints(std::string filePath[]);
 	void WriteLocalMaxPoints(std::string filePath[]);
-	void WriteOneLevel(const char* SaliencyPath, const char* LocalMaxPath);
-	void WriteOneLevel(const char* SaliencyAndLocalMaxPath);
+	void WriteOneLevelAndLocalMax(const char* SaliencyPath, const char* LocalMaxPath);
+	void WriteOneLevelAndLocalMax(const char* SaliencyPathAndLocalMaxPath);
+	void WriteOneLevel(const char* OneSaliencyPath);
 	inline float* getNormal() { return normals; };
 	inline float* getMeanCurvature() { return meanCurvature; };
 	inline float* getSmoothSaliency() { return smoothSaliency; };

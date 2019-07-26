@@ -2,10 +2,12 @@
 #include <qfiledialog.h>
 #include <qdir.h>
 #include <qfileinfo.h>
-VolumeRender::VolumeRender(QVTKWidget* widget, VolumeData *input)
+VolumeRender::VolumeRender(QVTKWidget* widget, VolumeData *input, ctkVTKVolumePropertyWidget* volumeWidget)
 {
 	data = input;
 	qvtkwidget = widget;
+	this->volumeWidget = volumeWidget;
+	GPUEnable = false;
 }
 
 void VolumeRender::GPU(const char* file_path, const char* fileExt)
@@ -53,6 +55,7 @@ void VolumeRender::GPU(const char* file_path, const char* fileExt)
 	//volumeMapper->SetAutoAdjustSampleDistances(0);//设置图像采样步长  
 	//volumeMapper->SetImageSampleDistance(4);  
     /*************************************************************************/
+	GPUEnable = true;
 	Rendering(volumeMapper);
 }
 
@@ -157,6 +160,8 @@ void VolumeRender::Rendering(vtkAbstractVolumeMapper *mapper)
 		vtkSmartPointer<vtkVolume>::New();
 	volume->SetMapper(mapper);
 	volume->SetProperty(volumeProperty);
+	if (GPUEnable)
+		this->volumeWidget->setVolumeProperty(volumeProperty);
 	vtkSmartPointer<vtkRenderer> ren = vtkSmartPointer<vtkRenderer>::New();
 	//ren->SetBackground(0, 1, 0);
 	ren->AddVolume(volume);
